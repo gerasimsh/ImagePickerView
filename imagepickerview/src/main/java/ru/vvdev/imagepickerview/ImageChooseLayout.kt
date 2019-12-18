@@ -18,6 +18,7 @@ import android.widget.Toast
 import com.mlsdev.rximagepicker.RxImagePicker
 import com.mlsdev.rximagepicker.Sources
 import android.support.v7.app.AlertDialog
+import kotlinx.android.synthetic.main.item_photo_close.view.*
 
 
 /**
@@ -35,8 +36,12 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
     lateinit var lisenter: ILoadPahts
 
 
-    val items: List<Image>
-        get() = imageList
+    val items: List<Uri>
+        get() {
+            val list: MutableList<Uri> = mutableListOf()
+            imageList.mapTo(list, { it.image })
+            return list
+        }
     private val TAG = "ImageChooseLayout"
 
     init {
@@ -133,7 +138,9 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
         imageRv.adapter = imageAddAdapter
         if (imageAttr.canAddPhoto) {
             imageList.add(Image(Uri.EMPTY))
-            //  imageAttr.maxPhotos += 1
+           // imageAttr.maxPhotos += 1
+        } else {
+            imageList.clear()
         }
 
         imageAddAdapter.setData(imageList)
@@ -185,7 +192,7 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
             imageAttr.canAddPhoto = b
 
             if (b && imageList.isNotEmpty() && imageList[0].image != Uri.EMPTY) {
-                //imageAttr.maxPhotos += 1
+                // imageAttr.maxPhotos += 1
                 imageList.add(0, Image(Uri.EMPTY))
             } else if (imageList.isNotEmpty() && imageList[0].image == Uri.EMPTY) {
                 //  imageAttr.maxPhotos -= 1
@@ -275,7 +282,6 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
 
     interface ILoadPahts {
         fun loadPhoto(uri: Uri)
-
     }
 
 

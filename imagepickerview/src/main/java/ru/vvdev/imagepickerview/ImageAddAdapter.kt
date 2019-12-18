@@ -3,7 +3,6 @@ package ru.vvdev.imagepickerview
 
 import android.content.res.Resources
 import android.graphics.PorterDuff
-import android.graphics.Typeface
 import android.net.Uri
 import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.CardView
@@ -75,7 +74,7 @@ class ImageAddAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return if (viewType == 0) {
+        return if (viewType == 0 && attr.canAddPhoto) {
             AddHolder(
                 LayoutInflater.from(parent.context).inflate(
                     R.layout.item_photo,
@@ -98,14 +97,16 @@ class ImageAddAdapter(
 
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (position) {
-            0 -> {
-                (holder as AddHolder).bind(position, attr)
+        try {
+            when {
+                position == 0 && attr.canAddPhoto -> (holder as AddHolder).bind(position, attr)
+                else -> (holder as ViewHolderMy).bind(getItem(position), position, attr)
+
             }
-            else -> {
-                (holder as ViewHolderMy).bind(getItem(position), TYPE_ITEM, position, attr)
-            }
+        } catch (e: Exception) {
+
         }
+
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -138,7 +139,11 @@ class ImageAddAdapter(
         private var imageCardView: CardView = view.findViewById<View>(R.id.imageCard) as CardView
 
 
-        fun bind(dialog: Image?, type: Int, position: Int, attr: ImageAttr) {
+        fun bind(
+            dialog: Image?,
+            position: Int,
+            attr: ImageAttr
+        ) {
             if (dialog == null)
                 return
             Log.i("MyLog", "$dialog tyu")
@@ -195,8 +200,12 @@ class ImageAddAdapter(
             view.findViewById<View>(R.id.add) as RelativeLayout
         private var text: TextView = view.findViewById<View>(R.id.tv) as TextView
         private var imageCard: CardView = view.findViewById<View>(R.id.imageCard) as CardView
+        private var rootLay: RelativeLayout =
+            view.findViewById<View>(R.id.rootLayout) as RelativeLayout
 
         fun bind(position: Int, attr: ImageAttr) {
+            rootLay.visibility = if (attr.canAddPhoto) View.VISIBLE else View.GONE
+
             imageCard.tag = position
             with(attr) {
                 background.layoutParams.width = viewWight
@@ -210,7 +219,6 @@ class ImageAddAdapter(
                 text.setTextColor(addAttr.textColor)
                 text.textSize = addAttr.textSize
                 text.setTypeface(null, addAttr.textStyle)
-
             }
 
 
