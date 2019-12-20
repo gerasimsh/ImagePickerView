@@ -270,6 +270,14 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
         }
     }
 
+    fun setCanDelete(b: Boolean) {
+        imageAttr.canDelete = b
+        //  imageAddAdapter.updateAttr(imageAttr)
+        // imageAddAdapter.reload()
+
+
+    }
+
 
     fun uploadImage(image: Image) {
         val totalListSize = imageList.size + 1
