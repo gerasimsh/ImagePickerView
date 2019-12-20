@@ -249,33 +249,37 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
     }
 
     fun uploadList(uploadList: List<Image>) {
-        val totalListSize = uploadList.size + imageList.size
-        if (imageAttr.maxPhotos != 0 && totalListSize <= imageAttr.maxPhotos) {
+        if (imageAttr.maxPhotos == 0) {
             imageList.addAll(uploadList)
             imageAddAdapter.setData(imageList)
             imageAddAdapter.reload()
-
         } else {
-            if (totalListSize - imageAttr.maxPhotos <= 0) {
+            var maxCountToUpload = imageList.size
+            if (imageAttr.canAddPhoto)
+                maxCountToUpload--
+            maxCountToUpload = imageAttr.maxPhotos - maxCountToUpload
+
+            if (maxCountToUpload <= 0) {
                 Toast.makeText(context, imageAttr.messageWhenMaxSize, Toast.LENGTH_LONG).show()
             } else {
-                imageList.addAll(uploadList.take(totalListSize - imageAttr.maxPhotos))
+                imageList.addAll(uploadList.take(maxCountToUpload))
                 Log.i(
                     TAG,
-                    "images loaded, but not all,  because you try upload $totalListSize, when limit upload photos = ${imageAttr.maxPhotos}"
+                    "images loaded, but not all,  because you try upload $maxCountToUpload, when limit upload photos = ${imageAttr.maxPhotos}"
                 )
                 imageAddAdapter.setData(imageList)
                 imageAddAdapter.reload()
+
             }
+
+
         }
     }
 
     fun setCanDelete(b: Boolean) {
         imageAttr.canDelete = b
         //  imageAddAdapter.updateAttr(imageAttr)
-        // imageAddAdapter.reload()
-
-
+        imageAddAdapter.reload()
     }
 
 
