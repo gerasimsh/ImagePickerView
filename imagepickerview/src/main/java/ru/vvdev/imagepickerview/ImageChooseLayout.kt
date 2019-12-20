@@ -39,7 +39,9 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
     val items: List<Uri>
         get() {
             val list: MutableList<Uri> = mutableListOf()
-            imageList.mapTo(list, { it.image })
+            imageList.forEach {
+                if (!it.image.path.isNullOrBlank()) list.add(it.image)
+            }
             return list
         }
     private val TAG = "ImageChooseLayout"
@@ -138,7 +140,7 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
         imageRv.adapter = imageAddAdapter
         if (imageAttr.canAddPhoto) {
             imageList.add(Image(Uri.EMPTY))
-           // imageAttr.maxPhotos += 1
+            // imageAttr.maxPhotos += 1
         } else {
             imageList.clear()
         }
