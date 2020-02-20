@@ -44,7 +44,7 @@ class ImageAddAdapter(
         imageList?.removeAt(position);
         notifyItemRemoved(position); }
 
-    fun reloadItem(position: Int) {
+    private fun reloadItem(position: Int) {
         notifyItemChanged(position)
     }
 

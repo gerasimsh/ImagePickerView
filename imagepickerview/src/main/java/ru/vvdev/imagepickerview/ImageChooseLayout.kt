@@ -159,35 +159,37 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
             .setPositiveButton("Камера") { dialog, which ->
 
                 RxImagePicker.with(context).requestImage(Sources.CAMERA).subscribe { uri ->
-                    if (::lisenter.isInitialized) {
-                        lisenter.loadPhoto(uri)
-                    } else {
-                        imageList.add(Image(uri))
-                        imageAddAdapter.setData(imageList)
-                        imageAddAdapter.reload()
-                    }
-
+                    loadPhotoToAdapter(uri)
                 }
             }
             .setNegativeButton(
                 "Галлерея"
             ) { dialog, id ->
                 RxImagePicker.with(context).requestMultipleImages().subscribe { arayUri ->
-                    arayUri.forEach {
-                        if (::lisenter.isInitialized) {
-                            lisenter.loadPhoto(it)
-                        } else {
-                            imageList.add(Image(it))
-                            imageAddAdapter.setData(imageList)
-                            imageAddAdapter.reload()
-                        }
-                    }
-
-
+                    loadPhotoToAdapter(*arayUri.toTypedArray())
                 }
             }
         val alert = builder.create()
         alert.show()
+
+    }
+
+    private fun loadPhotoToAdapter(vararg array: Uri) {
+        for (index in array.indices) {
+            if (::lisenter.isInitialized) {
+                lisenter.loadPhoto(array[index])
+            }
+            val totalListSize = imageList.size
+            if (imageAttr.maxPhotos == 0 || totalListSize <= imageAttr.maxPhotos) {
+                imageList.add(Image(array[index]))
+                imageAddAdapter.setData(imageList)
+                imageAddAdapter.reload()
+            } else {
+                Toast.makeText(context, imageAttr.messageWhenMaxSize, Toast.LENGTH_LONG).show()
+                break
+            }
+        }
+
 
     }
 
