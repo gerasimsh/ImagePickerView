@@ -18,7 +18,6 @@ import android.widget.Toast
 import com.mlsdev.rximagepicker.RxImagePicker
 import com.mlsdev.rximagepicker.Sources
 import android.support.v7.app.AlertDialog
-import kotlinx.android.synthetic.main.item_photo_close.view.*
 
 
 /**
@@ -39,7 +38,9 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
     val items: List<Uri>
         get() {
             val list: MutableList<Uri> = mutableListOf()
-            imageList.mapTo(list, { it.image })
+            imageList.forEach {
+                if (!it.image.path.isNullOrBlank()) list.add(it.image)
+            }
             return list
         }
     private val TAG = "ImageChooseLayout"
@@ -138,7 +139,7 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
         imageRv.adapter = imageAddAdapter
         if (imageAttr.canAddPhoto) {
             imageList.add(Image(Uri.EMPTY))
-           // imageAttr.maxPhotos += 1
+            // imageAttr.maxPhotos += 1
         } else {
             imageList.clear()
         }
@@ -156,6 +157,7 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
             .setMessage("Нужно выбрать откуда загрузить фотографию")
             .setCancelable(true)
             .setPositiveButton("Камера") { dialog, which ->
+
                 RxImagePicker.with(context).requestImage(Sources.CAMERA).subscribe { uri ->
                     if (::lisenter.isInitialized) {
                         lisenter.loadPhoto(uri)
@@ -170,14 +172,17 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
             .setNegativeButton(
                 "Галлерея"
             ) { dialog, id ->
-                RxImagePicker.with(context).requestImage(Sources.GALLERY).subscribe { uri ->
-                    if (::lisenter.isInitialized) {
-                        lisenter.loadPhoto(uri)
-                    } else {
-                        imageList.add(Image(uri))
-                        imageAddAdapter.setData(imageList)
-                        imageAddAdapter.reload()
+                RxImagePicker.with(context).requestMultipleImages().subscribe { arayUri ->
+                    arayUri.forEach {
+                        if (::lisenter.isInitialized) {
+                            lisenter.loadPhoto(it)
+                        } else {
+                            imageList.add(Image(it))
+                            imageAddAdapter.setData(imageList)
+                            imageAddAdapter.reload()
+                        }
                     }
+
 
                 }
             }
@@ -247,25 +252,37 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
     }
 
     fun uploadList(uploadList: List<Image>) {
-        val totalListSize = uploadList.size + imageList.size
-        if (imageAttr.maxPhotos != 0 && totalListSize <= imageAttr.maxPhotos) {
+        if (imageAttr.maxPhotos == 0) {
             imageList.addAll(uploadList)
             imageAddAdapter.setData(imageList)
             imageAddAdapter.reload()
-
         } else {
-            if (totalListSize - imageAttr.maxPhotos <= 0) {
+            var maxCountToUpload = imageList.size
+            if (imageAttr.canAddPhoto)
+                maxCountToUpload--
+            maxCountToUpload = imageAttr.maxPhotos - maxCountToUpload
+
+            if (maxCountToUpload <= 0) {
                 Toast.makeText(context, imageAttr.messageWhenMaxSize, Toast.LENGTH_LONG).show()
             } else {
-                imageList.addAll(uploadList.take(totalListSize - imageAttr.maxPhotos))
+                imageList.addAll(uploadList.take(maxCountToUpload))
                 Log.i(
                     TAG,
-                    "images loaded, but not all,  because you try upload $totalListSize, when limit upload photos = ${imageAttr.maxPhotos}"
+                    "images loaded, but not all,  because you try upload $maxCountToUpload, when limit upload photos = ${imageAttr.maxPhotos}"
                 )
                 imageAddAdapter.setData(imageList)
                 imageAddAdapter.reload()
+
             }
+
+
         }
+    }
+
+    fun setCanDelete(b: Boolean) {
+        imageAttr.canDelete = b
+        //  imageAddAdapter.updateAttr(imageAttr)
+        imageAddAdapter.reload()
     }
 
 

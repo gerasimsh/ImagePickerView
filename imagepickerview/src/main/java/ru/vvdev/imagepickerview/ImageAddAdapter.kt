@@ -22,7 +22,7 @@ import java.util.ArrayList
 
 class ImageAddAdapter(
     private val mClickListener: OnClickChooseImage,
-    private val attr: ImageAttr,
+    private var attr: ImageAttr,
     private val resources: Resources,
     private val openClick: OpenClick
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -112,6 +112,10 @@ class ImageAddAdapter(
     override fun getItemViewType(position: Int): Int {
 
         return position
+    }
+
+    fun updateAttr(imageAttr: ImageAttr) {
+        attr = imageAttr
     }
 
     interface OnClickChooseImage {

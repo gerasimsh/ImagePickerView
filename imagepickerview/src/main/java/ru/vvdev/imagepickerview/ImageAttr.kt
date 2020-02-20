@@ -10,5 +10,5 @@ class ImageAttr(
     var maxPhotos: Int,
     val messageWhenMaxSize: String,
     var canAddPhoto: Boolean,
-    val canDelete: Boolean
+    var canDelete: Boolean
 )
