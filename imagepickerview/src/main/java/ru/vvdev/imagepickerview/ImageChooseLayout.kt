@@ -18,7 +18,6 @@ import android.widget.Toast
 import com.mlsdev.rximagepicker.RxImagePicker
 import com.mlsdev.rximagepicker.Sources
 import android.support.v7.app.AlertDialog
-import kotlinx.android.synthetic.main.item_photo_close.view.*
 
 
 /**
@@ -158,6 +157,7 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
             .setMessage("Нужно выбрать откуда загрузить фотографию")
             .setCancelable(true)
             .setPositiveButton("Камера") { dialog, which ->
+
                 RxImagePicker.with(context).requestImage(Sources.CAMERA).subscribe { uri ->
                     if (::lisenter.isInitialized) {
                         lisenter.loadPhoto(uri)
@@ -172,14 +172,17 @@ class ImageChooseLayout(context: Context, attrs: AttributeSet?) : LinearLayout(c
             .setNegativeButton(
                 "Галлерея"
             ) { dialog, id ->
-                RxImagePicker.with(context).requestImage(Sources.GALLERY).subscribe { uri ->
-                    if (::lisenter.isInitialized) {
-                        lisenter.loadPhoto(uri)
-                    } else {
-                        imageList.add(Image(uri))
-                        imageAddAdapter.setData(imageList)
-                        imageAddAdapter.reload()
+                RxImagePicker.with(context).requestMultipleImages().subscribe { arayUri ->
+                    arayUri.forEach {
+                        if (::lisenter.isInitialized) {
+                            lisenter.loadPhoto(it)
+                        } else {
+                            imageList.add(Image(it))
+                            imageAddAdapter.setData(imageList)
+                            imageAddAdapter.reload()
+                        }
                     }
+
 
                 }
             }
